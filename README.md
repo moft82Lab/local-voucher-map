@@ -1,23 +1,86 @@
 # 지역상품권 지도
 
-지역상품권 사용처를 지도와 검색으로 확인하는 원페이지 서비스입니다. 현재는 의성군 대표홈페이지 시스템이 제공하는 의성사랑상품권 가맹점 현황만 연결되어 있습니다. 전체 화면 지도, 플로팅 검색 패널, 업종 필터와 가맹점 목록을 한 화면에서 제공하며, 준비되지 않은 다른 지역의 데이터나 전국 통계는 노출하지 않습니다.
+지역사랑상품권 가맹점과 사용처를 이름, 주소, 업종, 지역으로 검색하고 지도에서 확인하는 원페이지 서비스입니다.
 
-로컬에 별도로 준비한 `data.csv`를 SQLite로 변환하고, Next.js Server Component가 읽기 전용으로 조회합니다. 원본 데이터 파일은 Git 이력에 포함하지 않고, 생성된 `data/merchants.sqlite`만 배포용으로 추적합니다. OpenStreetMap 기반 지도에서 읍·면별 집계와 상호·주소·업종 검색을 제공하며, 지도 코드는 필요할 때만 별도 번들로 로드됩니다.
+- 운영 사이트: [localvouchermap.kr](https://localvouchermap.kr)
+- GitHub: [moft82Lab/local-voucher-map](https://github.com/moft82Lab/local-voucher-map)
+- 데이터 원본: [경상북도 의성군_상품권가맹점정보](https://www.data.go.kr/data/15153218/fileData.do)
+
+현재는 의성사랑상품권 가맹점 데이터만 제공합니다. 전국 단위로 확장할 수 있는 데이터셋 목록 구조와 검색 UI를 갖추고 있지만, 연결되지 않은 지역이나 통계는 미리 노출하지 않습니다.
+
+## 현재 제공 데이터
+
+| 항목 | 내용 |
+| --- | --- |
+| 지역 | 경상북도 의성군 |
+| 데이터셋 | 상품권가맹점정보 |
+| 가맹점 | 1,999곳 |
+| 행정구역 | 18개 읍·면 |
+| 데이터 기준일 | 2025-11-20 |
+| 포함 정보 | 가맹점번호, 가맹점명, 소재지, 상세주소, 가맹점 유형 |
+
+원본에는 위도와 경도가 없습니다. 따라서 지도는 개별 가맹점의 정확한 위치가 아니라 읍·면 대표 위치와 지역별 가맹점 수를 표시합니다.
+
+## 주요 기능
+
+- 전체 화면 지도와 반응형 검색 패널
+- 가맹점명·주소·지역 통합 검색
+- 250ms 검색 디바운싱
+- 업종 및 읍·면 필터
+- 40건 단위 무한 스크롤
+- 지역별 가맹점 집계와 지도 이동
+- 데이터셋 출처·기준일·서비스 목적 안내
+- 데스크톱과 모바일 레이아웃 지원
+
+## 기술 구성
+
+- Next.js 16 App Router
+- React 19, TypeScript
+- Leaflet, React Leaflet, OpenStreetMap
+- SQLite, sql.js
+- Biome
+- Vercel
+
+Next.js Server Component가 SQLite를 읽고 페이지를 정적으로 생성합니다. 지도와 검색 영역만 Client Component로 분리하고, Leaflet 번들은 필요할 때 동적으로 불러옵니다.
 
 ## 로컬 실행
 
 요구 사항:
 
-- Node.js 24 LTS (`.nvmrc`와 `package.json`에서 고정)
+- Node.js 24 LTS
 - npm 10 이상
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-승인된 원본 `data.csv`가 프로젝트 루트에 있으면 `npm run dev` 실행 전에 `data/merchants.sqlite`를 다시 생성합니다. 원본이 없으면 저장소에 포함된 SQLite를 그대로 사용합니다.
 브라우저에서 `http://localhost:3000`을 엽니다.
+
+프로젝트 루트에 `data.csv`가 있으면 실행 전에 `data/merchants.sqlite`를 다시 생성합니다. CSV가 없으면 저장소에 포함된 SQLite를 그대로 사용합니다.
+
+## 데이터 갱신
+
+원본 `data.csv`는 UTF-8과 CP949를 지원하며 다음 컬럼 순서를 사용합니다.
+
+```csv
+가맹점번호,가맹점이름,상세주소,소재지,가맹점유형,수정일
+```
+
+갱신 절차:
+
+```bash
+npm run data:build
+npm run check
+```
+
+생성된 `data/merchants.sqlite`를 커밋하면 다음 Vercel 배포에 새 데이터가 반영됩니다.
+
+- `data.csv`: 로컬 전용, Git 제외
+- `경상북도.txt`: 로컬 전용, Git 제외
+- `data/merchants.sqlite`: 읽기 전용 배포 데이터, Git 추적
+
+SQLite에는 가맹점, 정규화 주소, 데이터 갱신일과 향후 좌표를 저장할 `merchant_locations` 테이블이 들어 있습니다.
 
 ## 품질 검사
 
@@ -27,73 +90,46 @@ npm run typecheck
 npm run build
 ```
 
-세 검사를 한 번에 실행하려면 `npm run check`를 사용합니다.
-
-## Vercel 배포
-
-### Git 연동 방식
-
-1. 이 폴더를 GitHub, GitLab, Bitbucket 또는 Azure DevOps 저장소에 푸시합니다.
-2. Vercel Dashboard에서 **Add New → Project**를 선택합니다.
-3. 저장소를 가져오면 Vercel이 Next.js를 자동 감지합니다.
-4. 별도 Output Directory 설정 없이 **Deploy**를 선택합니다.
-
-`main` 브랜치에 병합하면 Production 배포가 생성되고, 다른 브랜치와 Pull Request에는 Preview 배포가 생성됩니다.
-Vercel 빌드에는 저장소의 `data/merchants.sqlite`가 사용되므로 원본 CSV를 별도로 전달할 필요가 없습니다.
-
-### SEO 환경 변수
-
-Vercel 프로젝트의 **Settings → Environment Variables**에서 아래 값을 설정합니다.
-
-- `NEXT_PUBLIC_SITE_URL`: 커스텀 도메인으로 Canonical URL을 고정할 때 사용하는 전체 주소
-- `GOOGLE_SITE_VERIFICATION`: Google Search Console이 발급한 인증값
-- `NAVER_SITE_VERIFICATION`: 네이버 서치어드바이저가 발급한 인증값
-
-모두 선택 사항입니다. 운영 주소를 설정하지 않으면 Vercel이 제공하는 프로덕션 URL을 사용합니다. 이 경우 Vercel 프로젝트에서 시스템 환경 변수 자동 노출을 활성화해야 합니다.
-
-### CLI 방식
-
-전역 설치 없이 다음 명령으로 배포할 수 있습니다.
+세 검사를 한 번에 실행하려면 다음 명령을 사용합니다.
 
 ```bash
-npx vercel
-npx vercel --prod
+npm run check
 ```
 
-첫 명령은 Preview, 두 번째 명령은 Production 배포를 만듭니다. 실행 중 Vercel 로그인과 프로젝트 연결이 필요합니다.
+## 배포
 
-## 자주 수정하는 곳
+GitHub의 `main` 브랜치가 Vercel 프로덕션에 연결되어 있습니다. 저장소의 SQLite가 빌드 입력으로 포함되므로 Vercel에 원본 CSV나 외부 데이터베이스를 별도로 전달하지 않습니다.
 
-- 원페이지 진입점: `app/page.tsx`
-- 색상, 간격, 반응형 스타일: `app/globals.css`
-- 지도·검색 UI: `app/components/merchant-map.tsx`
-- SQLite 생성: `scripts/build-sqlite.ts`
-- SQLite 읽기: `lib/merchant-data.ts`
-- 제목, 설명, SNS 메타데이터: `app/layout.tsx`
-- 검색엔진 크롤링 규칙: `app/robots.ts`
-- 사이트맵: `app/sitemap.ts`
-- SNS 공유 이미지: `app/opengraph-image.tsx`
-- 파비콘: `app/icon.svg`
+- 운영 도메인: `https://localvouchermap.kr`
+- Vercel 프로젝트 주소: `https://local-voucher-map.vercel.app`
+- Node.js: `24.x`
+- Build Command: `npm run build`
+- Output Directory: Next.js 기본값
 
-## 가맹점 데이터
+운영 도메인은 코드의 기본 canonical URL로 설정되어 있습니다. 다른 환경에서 주소를 덮어써야 할 때만 다음 변수를 사용합니다.
 
-Git에서 제외되는 루트의 `data.csv`는 UTF-8과 CP949 인코딩을 모두 지원하며 다음 컬럼 순서를 사용합니다.
-
-```csv
-가맹점번호,가맹점이름,상세주소,소재지,가맹점유형,수정일
+```env
+NEXT_PUBLIC_SITE_URL=https://localvouchermap.kr
 ```
 
-CSV를 변경한 후에는 아래 명령으로 SQLite를 다시 생성하고, 변경된 `data/merchants.sqlite`를 커밋합니다.
+검색엔진 소유권 인증값은 발급받은 경우 Vercel 환경 변수에 추가합니다.
 
-```bash
-npm run data:build
+```env
+GOOGLE_SITE_VERIFICATION=
+NAVER_SITE_VERIFICATION=
 ```
 
-생성되는 `data/merchants.sqlite`는 배포 산출물로 Git에 포함합니다. 로컬에서는 `data.csv`가 있으면 `prebuild` 단계가 데이터베이스를 갱신하고, Vercel에서는 원본 CSV가 없으므로 저장소의 SQLite를 그대로 사용합니다. 애플리케이션은 이를 읽기 전용으로 조회합니다. 데이터베이스에는 가맹점, 정규화 주소, 데이터 갱신일과 향후 좌표를 저장할 `merchant_locations` 테이블이 들어 있습니다.
+## SEO
 
-CSV에는 위도·경도가 없으므로 현재 지도 마커는 개별 점포가 아니라 18개 읍·면의 대표 위치에 표시됩니다. 개별 점포의 정확한 마커가 필요하면 CSV에 위도·경도 컬럼을 추가하거나 별도의 지오코딩 과정을 거쳐야 합니다.
+- 운영 도메인 canonical
+- Open Graph 및 Twitter 공유 메타데이터
+- 1200×630 동적 공유 이미지
+- `WebApplication` 및 `Dataset` JSON-LD
+- `robots.txt`
+- 데이터 기준일을 반영한 `sitemap.xml`
+- 검색엔진이 읽을 수 있는 서버 렌더링 제목과 서비스 설명
 
-## 구조
+## 프로젝트 구조
 
 ```text
 app/
@@ -104,15 +140,29 @@ app/
 ├── icon.svg
 ├── layout.tsx
 ├── manifest.ts
-└── page.tsx
+├── opengraph-image.tsx
+├── page.tsx
+├── robots.ts
+└── sitemap.ts
+data/
+└── merchants.sqlite
 lib/
 ├── merchant-data.ts
-└── merchant-types.ts
+├── merchant-types.ts
+└── site-config.ts
 scripts/
 └── build-sqlite.ts
-data/
-└── merchants.sqlite  # 생성 후 Git에 포함하는 배포 데이터
-data.csv               # 로컬 전용, Git 제외
 ```
 
-페이지와 SQLite 조회는 Server Component에서 처리하고, 지도와 검색 영역만 Client Component로 분리했습니다.
+## 향후 과제
+
+- 지오코딩을 통한 개별 가맹점 좌표 구축
+- 여러 지자체 데이터셋을 수용하는 저장 구조 확장
+- 데이터 수집·검증·배포 자동화
+- 데이터 규모 증가 시 외부 운영 데이터베이스 또는 객체 스토리지 도입
+
+## 출처와 개발자
+
+- 데이터 제공: 의성군, 공공데이터포털
+- 지도 시각화 및 개발: `moft82`
+- 문의: [moftlab82@gmail.com](mailto:moftlab82@gmail.com)

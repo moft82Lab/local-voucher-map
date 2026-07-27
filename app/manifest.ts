@@ -1,11 +1,14 @@
 import type { MetadataRoute } from "next";
+import {
+  SITE_DESCRIPTION,
+  SITE_NAME,
+} from "@/lib/site-config";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "지역상품권 지도",
-    short_name: "지역상품권 지도",
-    description:
-      "지역사랑상품권 가맹점과 사용처를 지도에서 찾아보세요.",
+    name: SITE_NAME,
+    short_name: SITE_NAME,
+    description: SITE_DESCRIPTION,
     start_url: "/",
     display: "standalone",
     background_color: "#f4f0e6",
