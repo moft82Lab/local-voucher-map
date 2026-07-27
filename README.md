@@ -39,7 +39,7 @@
 - Leaflet, React Leaflet, OpenStreetMap
 - SQLite, sql.js
 - Biome
-- Vercel
+- Vercel Web Analytics, Speed Insights
 
 Next.js Server Component가 SQLite를 읽고 페이지를 정적으로 생성합니다. 지도와 검색 영역만 Client Component로 분리하고, Leaflet 번들은 필요할 때 동적으로 불러옵니다.
 
@@ -118,6 +118,8 @@ NEXT_PUBLIC_SITE_URL=https://localvouchermap.kr
 GOOGLE_SITE_VERIFICATION=
 NAVER_SITE_VERIFICATION=
 ```
+
+Vercel 대시보드에서 Web Analytics와 Speed Insights를 활성화하면 익명 방문 통계와 실제 사용자 환경의 Core Web Vitals를 수집합니다.
 
 ## SEO
 
