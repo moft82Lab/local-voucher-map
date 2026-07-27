@@ -1,0 +1,43 @@
+{
+  "name": "local-voucher-map",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "data:build": "tsx scripts/build-sqlite.ts",
+    "predev": "npm run data:build",
+    "dev": "next dev",
+    "prebuild": "npm run data:build",
+    "build": "next build",
+    "start": "next start",
+    "lint": "biome lint app lib scripts next.config.ts",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run lint && npm run typecheck && npm run build"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4",
+    "next": "16.2.12",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-leaflet": "^5.0.0",
+    "sql.js": "^1.14.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.5",
+    "@types/leaflet": "^1.9.21",
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "@types/sql.js": "^1.4.11",
+    "tsx": "^4.23.1",
+    "typescript": "5.9.3"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.23",
+      "sharp": "0.35.3"
+    }
+  }
+}

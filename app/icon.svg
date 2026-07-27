@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>지역상품권 지도</title>
+  <rect width="64" height="64" rx="18" fill="#263d2e"/>
+  <circle cx="32" cy="32" r="22" fill="none" stroke="#f4f0e6" stroke-width="2"/>
+  <path d="M18 38c6-12 14-17 30-17M20 42c8-7 17-9 28-8" fill="none" stroke="#f4f0e6" stroke-linecap="round" stroke-width="2"/>
+</svg>
