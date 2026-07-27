@@ -1,4 +1,5 @@
 import {
+  existsSync,
   mkdirSync,
   readFileSync,
   renameSync,
@@ -100,6 +101,19 @@ function normalizeAddress(address: string) {
 }
 
 async function buildDatabase() {
+  if (!existsSync(sourcePath)) {
+    if (existsSync(databasePath)) {
+      console.log(
+        "data.csv가 없어 저장소의 data/merchants.sqlite를 사용합니다.",
+      );
+      return;
+    }
+
+    throw new Error(
+      "data.csv 또는 data/merchants.sqlite가 필요합니다. 배포 저장소에 SQLite가 포함되어 있는지 확인하세요.",
+    );
+  }
+
   const decodedCsv = decodeCsv(readFileSync(sourcePath));
   const [headers = [], ...rows] = parseCsv(decodedCsv);
   assertHeaders(headers);

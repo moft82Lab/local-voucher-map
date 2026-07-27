@@ -8,6 +8,7 @@
 # production
 /build
 /data/*.sqlite*
+!/data/merchants.sqlite
 
 # local environment files
 .env*
