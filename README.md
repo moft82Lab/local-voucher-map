@@ -43,6 +43,16 @@ npm run build
 `main` 브랜치에 병합하면 Production 배포가 생성되고, 다른 브랜치와 Pull Request에는 Preview 배포가 생성됩니다.
 현재 저장소만으로는 원본 데이터가 없으므로 데이터 전달 과정 없이 빌드할 수 없습니다.
 
+### SEO 환경 변수
+
+Vercel 프로젝트의 **Settings → Environment Variables**에서 아래 값을 설정합니다.
+
+- `NEXT_PUBLIC_SITE_URL`: 운영 도메인 전체 주소(예: `https://local-voucher-map.vercel.app`)
+- `GOOGLE_SITE_VERIFICATION`: Google Search Console이 발급한 인증값
+- `NAVER_SITE_VERIFICATION`: 네이버 서치어드바이저가 발급한 인증값
+
+검색엔진 인증값은 발급받은 경우에만 입력하면 됩니다. 운영 주소를 설정하지 않으면 Vercel이 제공하는 프로덕션 URL을 사용합니다.
+
 ### CLI 방식
 
 전역 설치 없이 다음 명령으로 배포할 수 있습니다.
@@ -62,6 +72,9 @@ npx vercel --prod
 - SQLite 생성: `scripts/build-sqlite.ts`
 - SQLite 읽기: `lib/merchant-data.ts`
 - 제목, 설명, SNS 메타데이터: `app/layout.tsx`
+- 검색엔진 크롤링 규칙: `app/robots.ts`
+- 사이트맵: `app/sitemap.ts`
+- SNS 공유 이미지: `app/opengraph-image.tsx`
 - 파비콘: `app/icon.svg`
 
 ## 가맹점 데이터

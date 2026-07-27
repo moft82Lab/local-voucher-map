@@ -1,17 +1,26 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import {
+  getSiteUrl,
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_TITLE,
+} from "@/lib/site-config";
 import "leaflet/dist/leaflet.css";
 import "./globals.css";
 
+const siteUrl = getSiteUrl();
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
-    default: "지역상품권 지도",
-    template: "%s | 지역상품권 지도",
+    default: SITE_TITLE,
+    template: `%s | ${SITE_NAME}`,
   },
-  description:
-    "지역사랑상품권 가맹점과 사용처를 지도에서 찾아보는 지역상품권 지도 서비스.",
-  applicationName: "지역상품권 지도",
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
   keywords: [
+    "지역사랑상품권",
     "지역상품권",
     "지역화폐",
     "가맹점 지도",
@@ -20,21 +29,58 @@ export const metadata: Metadata = {
     "가맹점",
     "상품권 사용처",
   ],
+  alternates: {
+    canonical: "/",
+  },
   authors: [{ name: "moft82", url: "mailto:moftlab82@gmail.com" }],
   creator: "moft82",
+  publisher: "moft82",
+  category: "maps",
+  referrer: "origin-when-cross-origin",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  verification: {
+    ...(process.env.GOOGLE_SITE_VERIFICATION
+      ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+      : {}),
+    ...(process.env.NAVER_SITE_VERIFICATION
+      ? {
+          other: {
+            "naver-site-verification": process.env.NAVER_SITE_VERIFICATION,
+          },
+        }
+      : {}),
+  },
   openGraph: {
     type: "website",
     locale: "ko_KR",
-    title: "지역상품권 지도",
-    description:
-      "지역사랑상품권 가맹점과 사용처를 지도에서 찾아보세요.",
-    siteName: "지역상품권 지도",
+    url: "/",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    siteName: SITE_NAME,
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "지역상품권 지도 서비스 미리보기",
+      },
+    ],
   },
   twitter: {
-    card: "summary",
-    title: "지역상품권 지도",
-    description:
-      "지역사랑상품권 가맹점과 사용처를 지도에서 찾아보세요.",
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: ["/opengraph-image"],
   },
 };
 

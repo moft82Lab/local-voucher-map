@@ -99,3 +99,8 @@ export async function getMerchantDataset(): Promise<MerchantDataset> {
     updatedAt: getMetadataValue(database, "updated_at"),
   };
 }
+
+export async function getMerchantUpdatedAt() {
+  const database = await getDatabase();
+  return getMetadataValue(database, "updated_at");
+}
